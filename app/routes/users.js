@@ -1,8 +1,8 @@
 /*
  * @Author: 唐云 
  * @Date: 2021-01-16 23:26:52 
- * @Last Modified by:   唐云 
- * @Last Modified time: 2021-01-16 23:26:52 
+ * @Last Modified by: 唐云
+ * @Last Modified time: 2021-01-17 00:44:11
  */
 const Router = require('koa-router')
 const router = new Router({ prefix: '/users' })
@@ -21,7 +21,7 @@ router.post('/', create)
 
 router.get('/:id', findById)
 
-router.put('/:id', update)
+router.patch('/:id', update)
 
 router.delete('/:id', del)
 
