@@ -1,4 +1,4 @@
-const db = [{name: 'zs'}]
+const db = [{ name: 'zs' }]
 
 class UsersController {
   find(ctx) {
@@ -11,6 +11,10 @@ class UsersController {
     ctx.body = db[ctx.params.id * 1]
   }
   create(ctx) {
+    ctx.verifyParams({
+      name: { type: 'string', required: true },
+      age: { type: 'number', required: false },
+    })
     db.push(ctx.request.body)
     ctx.body = ctx.request.body
   }
