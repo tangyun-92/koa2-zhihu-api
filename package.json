@@ -1,0 +1,16 @@
+{
+  "name": "koa2-zhihu-api",
+  "version": "1.0.0",
+  "description": "基于koa2的仿知乎api接口",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^2.13.1",
+    "koa-bodyparser": "^4.3.0",
+    "koa-router": "^10.0.0"
+  }
+}
