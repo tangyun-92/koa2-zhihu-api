@@ -11,6 +11,7 @@ class UsersController {
     ctx.body = db[ctx.params.id * 1]
   }
   create(ctx) {
+    // 参数校验
     ctx.verifyParams({
       name: { type: 'string', required: true },
       age: { type: 'number', required: false },
@@ -19,6 +20,11 @@ class UsersController {
     ctx.body = ctx.request.body
   }
   update(ctx) {
+    // 参数校验
+    ctx.verifyParams({
+      name: { type: 'string', required: true },
+      age: { type: 'number', required: false },
+    })
     db[ctx.params.id * 1] = ctx.request.body
     ctx.body = ctx.request.body
   }
