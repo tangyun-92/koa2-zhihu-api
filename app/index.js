@@ -8,6 +8,7 @@ const app = new Koa()
 const routing = require('./routes')
 const { connectionStr } = require('./config')
 
+// 连接数据库
 mongoose.connect(
   connectionStr,
   { useNewUrlParser: true, useUnifiedTopology: true },
