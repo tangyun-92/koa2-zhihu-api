@@ -1,8 +1,7 @@
 const Router = require('koa-router')
 const router = new Router()
+const { index } = require('../controllers/home')
 
-router.get('/', (ctx, next) => {
-  ctx.body = '这是主页'
-})
+router.get('/', index)
 
 module.exports = router

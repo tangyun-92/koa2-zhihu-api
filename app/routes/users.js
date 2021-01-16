@@ -1,26 +1,22 @@
 const Router = require('koa-router')
-const router = new Router({prefix: '/users'})
-const db = [{name: 'lilei'}]
+const router = new Router({ prefix: '/users' })
+const db = [{ name: 'lilei' }]
+const {
+  find,
+  findById,
+  create,
+  update,
+  delete: del,
+} = require('../controllers/users')
 
-router.get('/', (ctx, next) => {
-  ctx.body = [{ name: 'zs' }]
-})
+router.get('/', find)
 
-router.post('/', (ctx, next) => {
-  ctx.body = [{ name: 'zs' }]
-})
+router.post('/', create)
 
-router.get('/:id', (ctx, next) => {
-  ctx.body = [{ name: 'zs' }]
-})
+router.get('/:id', findById)
 
-router.put('/:id', (ctx, next) => {
-  ctx.body = [{ name: 'zs' }]
-})
+router.put('/:id', update)
 
-router.delete('/:id', (ctx, next) => {
-  ctx.body = [{ name: 'zs' }]
-})
-
+router.delete('/:id', del)
 
 module.exports = router
