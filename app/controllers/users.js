@@ -2,9 +2,12 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-17 00:53:28
+ * @Last Modified time: 2021-01-17 21:34:09
  */
+const jsonwebtoken = require('jsonwebtoken')
+
 const User = require('../models/users')
+const { secret } = require('../config')
 
 class UsersController {
   /**
@@ -90,6 +93,28 @@ class UsersController {
     ctx.body = {
       status: 200,
       message: '删除成功！',
+    }
+  }
+
+  /**
+   * 登录
+   * @param {*} ctx
+   */
+  async login(ctx) {
+    ctx.verifyParams({
+      name: { type: 'string', required: true },
+      password: { type: 'string', required: true },
+    })
+    const user = await User.findOne(ctx.request.body)
+    if (!user) {
+      return ctx.throw(401, '用户名或密码不正确')
+    }
+    const { _id, name } = user
+    const token = jsonwebtoken.sign({ _id, name }, secret, {expiresIn: '1d'})
+    ctx.body = {
+      status: 200,
+      message: '登录成功',
+      token
     }
   }
 }
