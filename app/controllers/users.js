@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-17 21:54:21
+ * @Last Modified time: 2021-01-17 23:39:34
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -28,7 +28,14 @@ class UsersController {
    * @param {*} ctx
    */
   async findById(ctx) {
-    const user = await User.findById(ctx.params.id)
+    const { fields } = ctx.query
+    let user = null
+    if (fields) {
+      const selectFields = fields.split(';').filter(f => f).map(f => ` +${f}`).join('')
+      user = await User.findById(ctx.params.id).select(selectFields)
+    } else {
+      user = await User.findById(ctx.params.id)
+    }
     if (!user) {
       return ctx.throw(404, '用户不存在')
     }
@@ -63,8 +70,8 @@ class UsersController {
 
   /**
    * 授权的中间件
-   * @param {*} ctx 
-   * @param {*} next 
+   * @param {*} ctx
+   * @param {*} next
    */
   async checkOwner(ctx, next) {
     if (ctx.params.id !== ctx.state.user._id) {
@@ -82,6 +89,13 @@ class UsersController {
     ctx.verifyParams({
       name: { type: 'string', required: false },
       password: { type: 'string', required: false },
+      avatar_url: { type: 'string', required: false },
+      gender: { type: 'string', required: false },
+      headline: { type: 'string', required: false },
+      locations: { type: 'array', itemType: 'string', required: false },
+      business: { type: 'string', required: false },
+      employments: { type: 'array', itemType: 'object', required: false },
+      educations: { type: 'array', itemType: 'object', required: false },
     })
     const user = await User.findByIdAndUpdate(ctx.params.id, ctx.request.body)
     if (!user) {
