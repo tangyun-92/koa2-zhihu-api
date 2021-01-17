@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-17 21:34:09
+ * @Last Modified time: 2021-01-17 21:54:21
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -62,6 +62,18 @@ class UsersController {
   }
 
   /**
+   * 授权的中间件
+   * @param {*} ctx 
+   * @param {*} next 
+   */
+  async checkOwner(ctx, next) {
+    if (ctx.params.id !== ctx.state.user._id) {
+      return ctx.throw(403, '没有权限！')
+    }
+    await next()
+  }
+
+  /**
    * 更新用户信息
    * @param {*} ctx
    */
@@ -110,11 +122,11 @@ class UsersController {
       return ctx.throw(401, '用户名或密码不正确')
     }
     const { _id, name } = user
-    const token = jsonwebtoken.sign({ _id, name }, secret, {expiresIn: '1d'})
+    const token = jsonwebtoken.sign({ _id, name }, secret, { expiresIn: '1d' })
     ctx.body = {
       status: 200,
       message: '登录成功',
-      token
+      token,
     }
   }
 }
