@@ -2,10 +2,11 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:52
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-17 21:53:43
+ * @Last Modified time: 2021-01-17 22:01:17
  */
 const Router = require('koa-router')
 const jsonwebtoken = require('jsonwebtoken')
+const jwt = require('koa-jwt')
 
 const router = new Router({ prefix: '/users' })
 const db = [{ name: 'lilei' }]
@@ -21,21 +22,9 @@ const {
 const { secret } = require('../config')
 
 /**
- * 验证token中间件
- * @param {*} ctx 
- * @param {*} next 
+ * 使用koa-jwt实现验证token
  */
-const auth = async (ctx, next) => {
-  const { authorization = '' } = ctx.request.header
-  const token = authorization.replace('Bearer ', '')
-  try {
-    const user = jsonwebtoken.verify(token, secret)
-    ctx.state.user = user
-  } catch (error) {
-    ctx.throw(401, error.message)
-  }
-  await next()
-}
+const auth = jwt({ secret })
 
 router.get('/', find)
 
