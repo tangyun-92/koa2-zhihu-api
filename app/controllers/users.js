@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-17 23:39:34
+ * @Last Modified time: 2021-01-18 22:46:29
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -31,7 +31,11 @@ class UsersController {
     const { fields } = ctx.query
     let user = null
     if (fields) {
-      const selectFields = fields.split(';').filter(f => f).map(f => ` +${f}`).join('')
+      const selectFields = fields
+        .split(';')
+        .filter((f) => f)
+        .map((f) => ` +${f}`)
+        .join('')
       user = await User.findById(ctx.params.id).select(selectFields)
     } else {
       user = await User.findById(ctx.params.id)
@@ -141,6 +145,79 @@ class UsersController {
       status: 200,
       message: '登录成功',
       token,
+    }
+  }
+
+  /**
+   * 获取他关注的人列表
+   * @param {*} ctx
+   */
+  async listFollowing(ctx) {
+    const user = await User.findById(ctx.params.id)
+      .select('+following')
+      .populate('following')
+    if (!user) {
+      return ctx.throw(404)
+    }
+    ctx.body = {
+      status: 200,
+      message: '获取成功！',
+      data: user.following,
+    }
+  }
+
+  /**
+   * 获取关注他的人列表
+   * @param {*} ctx 
+   */
+  async listFollower(ctx) {
+    const users = await User.find({ following: ctx.params.id })
+    if (!users) {
+      return ctx.throw(404)
+    }
+    ctx.body = {
+      status: 200,
+      message: '获取成功！',
+      data: users,
+    }
+  }
+
+  /**
+   * 关注
+   * @param {*} ctx
+   */
+  async follow(ctx) {
+    const me = await User.findById(ctx.state.user._id).select('+following')
+    if (!me.following.map((id) => id.toString()).includes(ctx.params.id)) {
+      // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
+      me.following.push(ctx.params.id)
+      me.save()
+      ctx.body = {
+        status: 200,
+        message: '关注成功！',
+      }
+    } else {
+      ctx.body = {
+        status: 208,
+        message: '您已关注过了',
+      }
+    }
+  }
+
+  /**
+   * 取消关注
+   * @param {*} ctx
+   */
+  async unFollow(ctx) {
+    const me = await User.findById(ctx.state.user._id).select('+following')
+    const index = me.following.map((id) => id.toString()).indexOf(ctx.params.id) // 获取要取消关注人在列表中的索引
+    if (index > -1) {
+      me.following.splice(index, 1)
+      me.save()
+    }
+    ctx.body = {
+      status: 200,
+      message: '取消关注成功！',
     }
   }
 }
