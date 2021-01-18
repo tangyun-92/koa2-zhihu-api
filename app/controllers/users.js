@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-18 22:46:29
+ * @Last Modified time: 2021-01-18 22:54:14
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -183,13 +183,26 @@ class UsersController {
   }
 
   /**
+   * 校验用户是否存在的中间件
+   * @param {*} ctx 
+   * @param {*} next 
+   */
+  async checkUserExist(ctx, next) {
+    const user = await User.findById(ctx.params.id)
+    if(!user) {
+      return ctx.throw(404, '用户不存在')
+    }
+    await next()
+  }
+
+  /**
    * 关注
    * @param {*} ctx
    */
   async follow(ctx) {
     const me = await User.findById(ctx.state.user._id).select('+following')
+    // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
     if (!me.following.map((id) => id.toString()).includes(ctx.params.id)) {
-      // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
       me.following.push(ctx.params.id)
       me.save()
       ctx.body = {

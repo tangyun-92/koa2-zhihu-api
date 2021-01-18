@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:52
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-18 22:45:03
+ * @Last Modified time: 2021-01-18 22:54:52
  */
 const Router = require('koa-router')
 const jsonwebtoken = require('jsonwebtoken')
@@ -20,6 +20,7 @@ const {
   checkOwner,
   listFollowing,
   listFollower,
+  checkUserExist,
   follow,
   unFollow
 } = require('../controllers/users')
@@ -46,8 +47,8 @@ router.get('/:id/following', listFollowing)
 
 router.get('/:id/followers', listFollower)
 
-router.put('/following/:id', auth, follow)
+router.put('/following/:id', auth, checkUserExist, follow)
 
-router.delete('/unFollowing/:id', auth, unFollow)
+router.delete('/unFollowing/:id', auth, checkUserExist, unFollow)
 
 module.exports = router
