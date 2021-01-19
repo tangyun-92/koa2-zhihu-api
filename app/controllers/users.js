@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-19 11:14:03
+ * @Last Modified time: 2021-01-19 23:14:51
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -16,8 +16,14 @@ class UsersController {
    * @param {*} ctx
    */
   async getUserList(ctx) {
+    let { limit = 10, page } = ctx.request.body
+    page = Math.max(page * 1, 1) - 1
+    limit = Math.max(limit * 1, 1)
     const users = await User.find()
-    ctx.body = returnCtxBody('查询成功', users)
+      .limit(limit)
+      .skip(page * limit)
+    const total = users.length
+    ctx.body = returnCtxBody('查询成功', users, 1, 200, total)
   }
 
   /**

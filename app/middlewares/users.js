@@ -1,3 +1,9 @@
+/*
+ * @Author: 唐云
+ * @Date: 2021-01-19 22:30:54
+ * @Last Modified by:   唐云
+ * @Last Modified time: 2021-01-19 22:30:54
+ */
 const User = require('../models/users')
 
 class userMiddleware {
