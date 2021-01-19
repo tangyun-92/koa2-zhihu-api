@@ -2,59 +2,47 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-18 22:54:14
+ * @Last Modified time: 2021-01-19 11:14:03
  */
 const jsonwebtoken = require('jsonwebtoken')
 
 const User = require('../models/users')
 const { secret } = require('../config')
+const { returnCtxBody } = require('../utils')
 
 class UsersController {
   /**
    * 查询用户列表
    * @param {*} ctx
    */
-  async find(ctx) {
-    const user = await User.find()
-    ctx.body = {
-      status: 200,
-      message: '查询成功！',
-      data: user,
-    }
+  async getUserList(ctx) {
+    const users = await User.find()
+    ctx.body = returnCtxBody('查询成功', users)
   }
 
   /**
    * 查找指定用户
    * @param {*} ctx
    */
-  async findById(ctx) {
-    const { fields } = ctx.query
-    let user = null
-    if (fields) {
-      const selectFields = fields
-        .split(';')
-        .filter((f) => f)
-        .map((f) => ` +${f}`)
-        .join('')
-      user = await User.findById(ctx.params.id).select(selectFields)
-    } else {
-      user = await User.findById(ctx.params.id)
-    }
+  async getUserInfo(ctx) {
+    ctx.verifyParams({
+      id: { type: 'string', required: true },
+    })
+    const id = ctx.request.body.id
+    const user = await User.findById(id).select(
+      '+educations +locations +business +employments'
+    )
     if (!user) {
       return ctx.throw(404, '用户不存在')
     }
-    ctx.body = {
-      status: 200,
-      message: '查询成功！',
-      data: user,
-    }
+    ctx.body = returnCtxBody('查询成功', user)
   }
 
   /**
    * 创建用户
    * @param {*} ctx
    */
-  async create(ctx) {
+  async createUser(ctx) {
     // 参数校验
     ctx.verifyParams({
       name: { type: 'string', required: true },
@@ -63,36 +51,21 @@ class UsersController {
     const { name } = ctx.request.body
     const repeatedUser = await User.findOne({ name })
     if (repeatedUser) {
-      return ctx.throw(409, '用户名已存在！')
+      return ctx.throw(409, '用户名已存在')
     }
     const user = await new User(ctx.request.body).save()
-    ctx.body = {
-      status: 200,
-      message: '创建用户成功！',
-    }
-  }
-
-  /**
-   * 授权的中间件
-   * @param {*} ctx
-   * @param {*} next
-   */
-  async checkOwner(ctx, next) {
-    if (ctx.params.id !== ctx.state.user._id) {
-      return ctx.throw(403, '没有权限！')
-    }
-    await next()
+    ctx.body = returnCtxBody('创建用户成功')
   }
 
   /**
    * 更新用户信息
    * @param {*} ctx
    */
-  async update(ctx) {
+  async updateUserInfo(ctx) {
     // 参数校验
     ctx.verifyParams({
+      id: { type: 'string', required: true },
       name: { type: 'string', required: false },
-      password: { type: 'string', required: false },
       avatar_url: { type: 'string', required: false },
       gender: { type: 'string', required: false },
       headline: { type: 'string', required: false },
@@ -101,29 +74,23 @@ class UsersController {
       employments: { type: 'array', itemType: 'object', required: false },
       educations: { type: 'array', itemType: 'object', required: false },
     })
-    const user = await User.findByIdAndUpdate(ctx.params.id, ctx.request.body)
-    if (!user) {
-      return ctx.throw(404, '用户不存在')
-    }
-    ctx.body = {
-      status: 200,
-      message: '修改成功！',
-    }
+    const user = await User.findByIdAndUpdate(
+      ctx.request.body.id,
+      ctx.request.body
+    )
+    ctx.body = returnCtxBody('更新成功')
   }
 
   /**
    * 删除指定用户
    * @param {*} ctx
    */
-  async delete(ctx) {
-    const user = await User.findByIdAndRemove(ctx.params.id)
+  async deleteUser(ctx) {
+    const user = await User.findByIdAndRemove(ctx.request.body.id)
     if (!user) {
       return ctx.throw(404, '用户不存在')
     }
-    ctx.body = {
-      status: 200,
-      message: '删除成功！',
-    }
+    ctx.body = returnCtxBody('删除成功')
   }
 
   /**
@@ -142,6 +109,7 @@ class UsersController {
     const { _id, name } = user
     const token = jsonwebtoken.sign({ _id, name }, secret, { expiresIn: '1d' })
     ctx.body = {
+      code: 1,
       status: 200,
       message: '登录成功',
       token,
@@ -152,47 +120,32 @@ class UsersController {
    * 获取他关注的人列表
    * @param {*} ctx
    */
-  async listFollowing(ctx) {
-    const user = await User.findById(ctx.params.id)
+  async interestList(ctx) {
+    ctx.verifyParams({
+      id: { type: 'string', required: true },
+    })
+    const user = await User.findById(ctx.request.body.id)
       .select('+following')
       .populate('following')
     if (!user) {
-      return ctx.throw(404)
+      return ctx.throw(404, '用户不存在')
     }
-    ctx.body = {
-      status: 200,
-      message: '获取成功！',
-      data: user.following,
-    }
+    ctx.body = returnCtxBody('查询成功', user.following)
   }
 
   /**
    * 获取关注他的人列表
-   * @param {*} ctx 
+   * @param {*} ctx
    */
-  async listFollower(ctx) {
-    const users = await User.find({ following: ctx.params.id })
+  async fanList(ctx) {
+    ctx.verifyParams({
+      id: { type: 'string', required: true },
+    })
+    const users = await User.find({ following: ctx.request.body.id })
     if (!users) {
-      return ctx.throw(404)
-    }
-    ctx.body = {
-      status: 200,
-      message: '获取成功！',
-      data: users,
-    }
-  }
-
-  /**
-   * 校验用户是否存在的中间件
-   * @param {*} ctx 
-   * @param {*} next 
-   */
-  async checkUserExist(ctx, next) {
-    const user = await User.findById(ctx.params.id)
-    if(!user) {
       return ctx.throw(404, '用户不存在')
     }
-    await next()
+    ctx.body = returnCtxBody('查询成功', users)
   }
 
   /**
@@ -202,18 +155,12 @@ class UsersController {
   async follow(ctx) {
     const me = await User.findById(ctx.state.user._id).select('+following')
     // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
-    if (!me.following.map((id) => id.toString()).includes(ctx.params.id)) {
-      me.following.push(ctx.params.id)
+    if (!me.following.map((id) => id.toString()).includes(ctx.request.body.id)) {
+      me.following.push(ctx.request.body.id)
       me.save()
-      ctx.body = {
-        status: 200,
-        message: '关注成功！',
-      }
+      ctx.body = returnCtxBody('关注成功')
     } else {
-      ctx.body = {
-        status: 208,
-        message: '您已关注过了',
-      }
+      ctx.throw(405, '您已经关注过了')
     }
   }
 
@@ -223,15 +170,12 @@ class UsersController {
    */
   async unFollow(ctx) {
     const me = await User.findById(ctx.state.user._id).select('+following')
-    const index = me.following.map((id) => id.toString()).indexOf(ctx.params.id) // 获取要取消关注人在列表中的索引
+    const index = me.following.map((id) => id.toString()).indexOf(ctx.request.body.id) // 获取要取消关注人在列表中的索引
     if (index > -1) {
       me.following.splice(index, 1)
       me.save()
     }
-    ctx.body = {
-      status: 200,
-      message: '取消关注成功！',
-    }
+    ctx.body = returnCtxBody('取消关注成功')
   }
 }
 

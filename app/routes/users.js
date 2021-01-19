@@ -2,28 +2,26 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:52
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-18 22:54:52
+ * @Last Modified time: 2021-01-19 11:12:43
  */
 const Router = require('koa-router')
 const jsonwebtoken = require('jsonwebtoken')
 const jwt = require('koa-jwt')
 
 const router = new Router({ prefix: '/users' })
-const db = [{ name: 'lilei' }]
 const {
-  find,
-  findById,
-  create,
-  update,
-  delete: del,
+  getUserList,
+  getUserInfo,
+  createUser,
+  updateUserInfo,
+  deleteUser,
   login,
-  checkOwner,
-  listFollowing,
-  listFollower,
-  checkUserExist,
+  interestList,
+  fanList,
   follow,
-  unFollow
+  unFollow,
 } = require('../controllers/users')
+const { checkOwner, checkUserExist } = require('../middlewares/users')
 const { secret } = require('../config')
 
 /**
@@ -31,24 +29,24 @@ const { secret } = require('../config')
  */
 const auth = jwt({ secret })
 
-router.get('/', find)
+router.post('/getUserList', getUserList)
 
-router.post('/', create)
+router.post('/createUser', createUser)
 
-router.get('/:id', findById)
+router.post('/getUserInfo', getUserInfo)
 
-router.patch('/:id', auth, checkOwner, update)
+router.post('/updateUserInfo', auth, checkOwner, updateUserInfo)
 
-router.delete('/:id', auth, checkOwner, del)
+router.post('/deleteUser', auth, checkOwner, deleteUser)
 
 router.post('/login', login)
 
-router.get('/:id/following', listFollowing)
+router.post('/interestList', interestList)
 
-router.get('/:id/followers', listFollower)
+router.post('/fanList', fanList)
 
-router.put('/following/:id', auth, checkUserExist, follow)
+router.post('/follow', auth, checkUserExist, follow)
 
-router.delete('/unFollowing/:id', auth, checkUserExist, unFollow)
+router.post('/unFollow', auth, checkUserExist, unFollow)
 
 module.exports = router

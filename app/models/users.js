@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-18 22:08:15
+ * @Last Modified time: 2021-01-19 10:35:16
  */
 const mongoose = require('mongoose')
 
@@ -51,7 +51,7 @@ const userSchema = new Schema({
       },
     ],
     select: false
-  }, // 关注者（粉丝）
+  }, // 关注列表
 })
 
 module.exports = model('User', userSchema)

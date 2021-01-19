@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:27:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-17 22:33:00
+ * @Last Modified time: 2021-01-19 09:51:18
  */
 const Koa = require('koa')
 const koaBody = require('koa-body')
@@ -28,11 +28,21 @@ mongoose.connection.on('error', console.error)
 app.use(koaStatic(path.join(__dirname, 'public')))
 
 // 错误处理
+function formatError(err) {
+  return {
+    status: err.status,
+    message: err.message,
+    code: -1,
+  }
+}
 app.use(
-  error({
-    postFormat: (e, { stack, ...rest }) =>
-      process.env.NODE_ENV === 'production' ? rest : { stack, ...rest },
-  })
+  error(
+    {
+      postFormat: (e, { stack, ...rest }) =>
+        process.env.NODE_ENV === 'production' ? rest : { stack, ...rest },
+      format: formatError
+    },
+  )
 )
 
 // 使用koa-body实现文件上传
