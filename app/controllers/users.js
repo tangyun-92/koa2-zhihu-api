@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 21:24:13
+ * @Last Modified time: 2021-01-20 21:57:27
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -36,8 +36,8 @@ class UsersController {
       id: { type: 'string', required: true },
     })
     const id = ctx.request.body.id
-    const user = await User.findById(id).select(
-      '+educations +locations +business +employments'
+    const user = await User.findById(id).select('+employments +educations').populate(
+      'locations business employments.company employments.job educations.school educations.major'
     )
     if (!user) {
       return ctx.throw(404, '用户不存在')

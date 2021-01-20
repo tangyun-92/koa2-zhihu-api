@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 16:30:56
+ * @Last Modified time: 2021-01-20 21:28:47
  */
 const mongoose = require('mongoose')
 
@@ -21,13 +21,16 @@ const userSchema = new Schema({
     required: true,
   }, // 性别，enum表示可枚举
   headline: { type: String }, // 一句话介绍自己
-  locations: { type: [{ type: String }], select: false }, // 居住地，表示数组中数据是字符串
-  business: { type: String, select: false }, // 行业
+  locations: {
+    type: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
+    select: false,
+  }, // 居住地，表示数组中数据是字符串
+  business: { type: Schema.Types.ObjectId, ref: 'Topic', select: false }, // 行业
   employments: {
     type: [
       {
-        company: { type: String },
-        job: { type: String },
+        company: { type: Schema.Types.ObjectId, ref: 'Topic' },
+        job: { type: Schema.Types.ObjectId, ref: 'Topic' },
       },
     ],
     select: false,
@@ -35,8 +38,8 @@ const userSchema = new Schema({
   educations: {
     type: [
       {
-        school: { type: String },
-        major: { type: String },
+        school: { type: Schema.Types.ObjectId, ref: 'Topic' },
+        major: { type: Schema.Types.ObjectId, ref: 'Topic' },
         diploma: { type: Number, enum: [1, 2, 3, 4, 5] }, // 学历
         entrance_year: { type: Number }, // 入学年份
         graduation_year: { type: Number }, // 毕业年份
