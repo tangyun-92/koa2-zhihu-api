@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 21:28:47
+ * @Last Modified time: 2021-01-20 22:01:59
  */
 const mongoose = require('mongoose')
 
@@ -60,7 +60,7 @@ const userSchema = new Schema({
     type: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Topic',
       },
     ],
     select: false,

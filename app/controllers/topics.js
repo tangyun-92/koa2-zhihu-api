@@ -2,9 +2,10 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 21:22:52
+ * @Last Modified time: 2021-01-20 22:26:17
  */
 const Topic = require('../models/topics')
+const User = require('../models/users')
 const { secret } = require('../config')
 const { returnCtxBody } = require('../utils')
 
@@ -81,6 +82,15 @@ class TopicsController {
       return ctx.throw(404, '话题不存在')
     }
     ctx.body = returnCtxBody('更新成功', newTopic)
+  }
+
+  /**
+   * 话题关注者（粉丝）列表
+   * @param {*} ctx
+   */
+  async topicsListFollowers(ctx) {
+    const users = await User.find({ topic: ctx.request.body.id })
+    ctx.body = returnCtxBody('查询成功', users)
   }
 }
 

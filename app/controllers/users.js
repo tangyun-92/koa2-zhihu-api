@@ -2,11 +2,12 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 21:57:27
+ * @Last Modified time: 2021-01-20 23:11:13
  */
 const jsonwebtoken = require('jsonwebtoken')
 
 const User = require('../models/users')
+const Question = require('../models/questions')
 const { secret } = require('../config')
 const { returnCtxBody } = require('../utils')
 
@@ -36,9 +37,11 @@ class UsersController {
       id: { type: 'string', required: true },
     })
     const id = ctx.request.body.id
-    const user = await User.findById(id).select('+employments +educations').populate(
-      'locations business employments.company employments.job educations.school educations.major'
-    )
+    const user = await User.findById(id)
+      .select('+employments +educations')
+      .populate(
+        'locations business employments.company employments.job educations.school educations.major'
+      )
     if (!user) {
       return ctx.throw(404, '用户不存在')
     }
@@ -211,6 +214,67 @@ class UsersController {
     let password = newPassword
     await User.findByIdAndUpdate(id, { password })
     ctx.body = returnCtxBody('修改密码成功')
+  }
+
+  /**
+   * 关注话题
+   * @param {*} ctx
+   */
+  async followerTopic(ctx) {
+    const me = await User.findById(ctx.state.user._id).select('+topic')
+    // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
+    if (!me.topic.map((id) => id.toString()).includes(ctx.request.body.id)) {
+      me.topic.push(ctx.request.body.id)
+      me.save()
+      ctx.body = returnCtxBody('关注成功')
+    } else {
+      ctx.throw(405, '您已经关注过了')
+    }
+  }
+
+  /**
+   * 取消关注话题
+   * @param {*} ctx
+   */
+  async unFollowerTopic(ctx) {
+    const me = await User.findById(ctx.state.user._id).select('+topic')
+    const index = me.topic
+      .map((id) => id.toString())
+      .indexOf(ctx.request.body.id) // 获取要取消关注话题在列表中的索引
+    if (index > -1) {
+      me.topic.splice(index, 1)
+      me.save()
+    }
+    ctx.body = returnCtxBody('取消关注成功')
+  }
+
+  /**
+   * 获取用户关注的话题
+   * @param {*} ctx
+   */
+  async followerTopicList(ctx) {
+    ctx.verifyParams({
+      id: { type: 'string', required: true },
+    })
+    const user = await User.findById(ctx.request.body.id)
+      .select('+topic')
+      .populate('topic')
+    if (!user) {
+      return ctx.throw(404, '用户不存在')
+    }
+    ctx.body = returnCtxBody('查询成功', user.topic)
+  }
+
+  /**
+   * 获取用户提问列表
+   * @param {*} ctx
+   */
+  async questionsList(ctx) {
+    ctx.verifyParams({
+      id: { type: 'string', required: true },
+    })
+    const questions = await Question.find({ questioner: ctx.request.body.id })
+    ctx.body = returnCtxBody('获取成功', questions)
   }
 }
 
