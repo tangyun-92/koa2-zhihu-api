@@ -2,9 +2,9 @@
  * @Author: 唐云
  * @Date: 2021-01-20 17:02:21
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 23:07:01
+ * @Last Modified time: 2021-01-20 23:13:44
  */
-const Question = require('../models/asks')
+const Question = require('../models/questions')
 const User = require('../models/users')
 const { returnCtxBody } = require('../utils')
 
