@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 10:48:25
+ * @Last Modified time: 2021-01-20 14:16:52
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -16,7 +16,7 @@ class TopicsController {
    * @param {*} ctx
    */
   async getTopicList(ctx) {
-    let { limit = 10, page } = ctx.request.body
+    let { limit = 10, page = 1 } = ctx.request.body
     page = Math.max(page * 1, 1) - 1
     limit = Math.max(limit * 1, 1)
     const topics = await Topic.find()
@@ -37,6 +37,9 @@ class TopicsController {
     const topic = await Topic.findById(ctx.request.body.id).select(
       '+introduction'
     )
+    if (!topic) {
+      return ctx.throw(404, '话题不存在')
+    }
     ctx.body = returnCtxBody('获取成功', topic)
   }
 
@@ -50,6 +53,11 @@ class TopicsController {
       avatar_url: { type: 'string', required: false },
       introduction: { type: 'string', required: false },
     })
+    const {name} = ctx.request.body
+    const repeatedTopic = await Topic.findOne({ name })
+    if (repeatedTopic) {
+      return ctx.throw(409, '话题已存在')
+    }
     const topic = await new Topic(ctx.request.body).save()
     ctx.body = returnCtxBody('新增成功', topic)
   }
@@ -70,6 +78,9 @@ class TopicsController {
       ctx.request.body
     )
     const newTopic = await Topic.findById(ctx.request.body.id)
+    if (!newTopic) {
+      return ctx.throw(404, '话题不存在')
+    }
     ctx.body = returnCtxBody('更新成功', newTopic)
   }
 }

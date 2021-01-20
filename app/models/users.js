@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-19 10:35:16
+ * @Last Modified time: 2021-01-20 15:36:08
  */
 const mongoose = require('mongoose')
 
@@ -13,6 +13,7 @@ const userSchema = new Schema({
   name: { type: String, required: true },
   password: { type: String, required: true, select: false },
   avatar_url: { type: String }, // 头像url
+  banner_url: { type: String }, // 个人中心banner url
   gender: {
     type: String,
     enum: ['male', 'female'],
@@ -50,7 +51,7 @@ const userSchema = new Schema({
         ref: 'User',
       },
     ],
-    select: false
+    select: false,
   }, // 关注列表
 })
 

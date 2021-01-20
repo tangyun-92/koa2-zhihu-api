@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 11:03:49
+ * @Last Modified time: 2021-01-20 15:40:15
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -73,6 +73,7 @@ class UsersController {
       id: { type: 'string', required: true },
       name: { type: 'string', required: false },
       avatar_url: { type: 'string', required: false },
+      banner_url: { type: 'string', required: false },
       gender: { type: 'string', required: false },
       headline: { type: 'string', required: false },
       locations: { type: 'array', itemType: 'string', required: false },
@@ -164,7 +165,9 @@ class UsersController {
   async follow(ctx) {
     const me = await User.findById(ctx.state.user._id).select('+following')
     // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
-    if (!me.following.map((id) => id.toString()).includes(ctx.request.body.id)) {
+    if (
+      !me.following.map((id) => id.toString()).includes(ctx.request.body.id)
+    ) {
       me.following.push(ctx.request.body.id)
       me.save()
       ctx.body = returnCtxBody('关注成功')
@@ -179,7 +182,9 @@ class UsersController {
    */
   async unFollow(ctx) {
     const me = await User.findById(ctx.state.user._id).select('+following')
-    const index = me.following.map((id) => id.toString()).indexOf(ctx.request.body.id) // 获取要取消关注人在列表中的索引
+    const index = me.following
+      .map((id) => id.toString())
+      .indexOf(ctx.request.body.id) // 获取要取消关注人在列表中的索引
     if (index > -1) {
       me.following.splice(index, 1)
       me.save()
