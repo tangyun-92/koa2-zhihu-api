@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:27:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-19 09:51:18
+ * @Last Modified time: 2021-01-20 16:09:43
  */
 const Koa = require('koa')
 const koaBody = require('koa-body')
@@ -23,6 +23,7 @@ mongoose.connect(
   () => console.log('MongoDB连接成功了')
 )
 mongoose.connection.on('error', console.error)
+mongoose.set('useFindAndModify', false)
 
 // 生成图片链接中间件
 app.use(koaStatic(path.join(__dirname, 'public')))

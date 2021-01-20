@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 15:40:15
+ * @Last Modified time: 2021-01-20 21:24:13
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -20,6 +20,7 @@ class UsersController {
     page = Math.max(page * 1, 1) - 1
     limit = Math.max(limit * 1, 1)
     const users = await User.find()
+      .find({ name: new RegExp(ctx.request.body.searchCon) })
       .limit(limit)
       .skip(page * limit)
     const total = users.length
@@ -190,6 +191,26 @@ class UsersController {
       me.save()
     }
     ctx.body = returnCtxBody('取消关注成功')
+  }
+
+  /**
+   * 修改密码
+   * @param {*} ctx
+   */
+  async updatePassword(ctx) {
+    ctx.verifyParams({
+      id: { type: 'string', required: true },
+      oldPassword: { type: 'string', required: true },
+      newPassword: { type: 'string', required: true },
+    })
+    const { id, oldPassword, newPassword } = ctx.request.body
+    const data = await User.findById(id).select('+password')
+    if (data.password !== oldPassword) {
+      return ctx.throw(404, '旧密码不正确')
+    }
+    let password = newPassword
+    await User.findByIdAndUpdate(id, { password })
+    ctx.body = returnCtxBody('修改密码成功')
   }
 }
 

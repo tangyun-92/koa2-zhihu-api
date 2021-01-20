@@ -2,10 +2,8 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 14:16:52
+ * @Last Modified time: 2021-01-20 21:22:52
  */
-const jsonwebtoken = require('jsonwebtoken')
-
 const Topic = require('../models/topics')
 const { secret } = require('../config')
 const { returnCtxBody } = require('../utils')
@@ -20,6 +18,7 @@ class TopicsController {
     page = Math.max(page * 1, 1) - 1
     limit = Math.max(limit * 1, 1)
     const topics = await Topic.find()
+      .find({ name: new RegExp(ctx.request.body.searchCon) })
       .limit(limit)
       .skip(page * limit)
     const total = topics.length
@@ -53,7 +52,7 @@ class TopicsController {
       avatar_url: { type: 'string', required: false },
       introduction: { type: 'string', required: false },
     })
-    const {name} = ctx.request.body
+    const { name } = ctx.request.body
     const repeatedTopic = await Topic.findOne({ name })
     if (repeatedTopic) {
       return ctx.throw(409, '话题已存在')

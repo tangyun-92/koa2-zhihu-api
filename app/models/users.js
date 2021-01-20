@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 15:36:08
+ * @Last Modified time: 2021-01-20 16:30:56
  */
 const mongoose = require('mongoose')
 
@@ -53,6 +53,15 @@ const userSchema = new Schema({
     ],
     select: false,
   }, // 关注列表
+  topic: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    select: false,
+  }, // 话题列表
 })
 
 module.exports = model('User', userSchema)

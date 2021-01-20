@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:52
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-19 11:12:43
+ * @Last Modified time: 2021-01-20 16:37:35
  */
 const Router = require('koa-router')
 const jsonwebtoken = require('jsonwebtoken')
@@ -20,6 +20,7 @@ const {
   fanList,
   follow,
   unFollow,
+  updatePassword,
 } = require('../controllers/users')
 const { checkOwner, checkUserExist } = require('../middlewares/users')
 const { secret } = require('../config')
@@ -48,5 +49,7 @@ router.post('/fanList', fanList)
 router.post('/follow', auth, checkUserExist, follow)
 
 router.post('/unFollow', auth, checkUserExist, unFollow)
+
+router.post('/updatePassword', auth, checkOwner, updatePassword)
 
 module.exports = router
