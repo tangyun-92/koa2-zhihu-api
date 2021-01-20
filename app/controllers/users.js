@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-19 23:14:51
+ * @Last Modified time: 2021-01-20 11:03:49
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -23,7 +23,7 @@ class UsersController {
       .limit(limit)
       .skip(page * limit)
     const total = users.length
-    ctx.body = returnCtxBody('查询成功', users, 1, 200, total)
+    ctx.body = returnCtxBody('查询成功', users, total, 1, 200)
   }
 
   /**
@@ -60,7 +60,7 @@ class UsersController {
       return ctx.throw(409, '用户名已存在')
     }
     const user = await new User(ctx.request.body).save()
-    ctx.body = returnCtxBody('创建用户成功')
+    ctx.body = returnCtxBody('创建用户成功', user)
   }
 
   /**
@@ -84,7 +84,10 @@ class UsersController {
       ctx.request.body.id,
       ctx.request.body
     )
-    ctx.body = returnCtxBody('更新成功')
+    const dbUser = await User.findById(ctx.request.body.id).select(
+      '+educations +locations +business +employments'
+    )
+    ctx.body = returnCtxBody('更新成功', dbUser)
   }
 
   /**

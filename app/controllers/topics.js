@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-19 23:11:57
+ * @Last Modified time: 2021-01-20 10:48:25
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -23,7 +23,7 @@ class TopicsController {
       .limit(limit)
       .skip(page * limit)
     const total = topics.length
-    ctx.body = returnCtxBody('获取成功', topics, 1, 200, total)
+    ctx.body = returnCtxBody('获取成功', topics, total)
   }
 
   /**
