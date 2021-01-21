@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 23:11:13
+ * @Last Modified time: 2021-01-21 09:36:27
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -17,11 +17,11 @@ class UsersController {
    * @param {*} ctx
    */
   async getUserList(ctx) {
-    let { limit = 10, page } = ctx.request.body
+    let { limit = 10, page, searchCon } = ctx.request.body
     page = Math.max(page * 1, 1) - 1
     limit = Math.max(limit * 1, 1)
     const users = await User.find()
-      .find({ name: new RegExp(ctx.request.body.searchCon) })
+      .find({ name: new RegExp(searchCon) })
       .limit(limit)
       .skip(page * limit)
     const total = users.length
@@ -249,7 +249,7 @@ class UsersController {
   }
 
   /**
-   * 获取用户关注的话题
+   * 获取用户关注的话题列表
    * @param {*} ctx
    */
   async followerTopicList(ctx) {

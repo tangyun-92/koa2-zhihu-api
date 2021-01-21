@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:52
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 22:26:37
+ * @Last Modified time: 2021-01-21 14:30:23
  */
 const Router = require('koa-router')
 const jwt = require('koa-jwt')
@@ -14,6 +14,7 @@ const {
   createTopic,
   updateTopic,
   topicsListFollowers,
+  topicsIncludeQuestionList,
 } = require('../controllers/topics')
 const { secret } = require('../config')
 
@@ -31,5 +32,7 @@ router.post('/createTopic', auth, createTopic)
 router.post('/updateTopic', auth, updateTopic)
 
 router.post('/topicsListFollowers', topicsListFollowers)
+
+router.post('/topicsIncludeQuestionList', topicsIncludeQuestionList)
 
 module.exports = router

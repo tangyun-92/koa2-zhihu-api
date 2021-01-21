@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-20 17:02:21
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 23:13:44
+ * @Last Modified time: 2021-01-21 15:41:00
  */
 const Question = require('../models/questions')
 const User = require('../models/users')
@@ -14,10 +14,10 @@ class QuestionController {
    * @param {*} ctx
    */
   async getQuestionList(ctx) {
-    let { limit = 10, page = 1 } = ctx.request.body
+    let { limit = 10, page = 1, searchCon } = ctx.request.body
     page = Math.max(page * 1, 1) - 1
     limit = Math.max(limit * 1, 1)
-    const q = new RegExp(ctx.request.searchCon)
+    const q = new RegExp(searchCon)
     const question = await Question.find({
       $or: [{ title: q }, { description: q }],
     })
@@ -37,7 +37,7 @@ class QuestionController {
     }
     const question = await Question.findById(ctx.request.body.id)
       .select('+introduction')
-      .populate('questioner')
+      .populate('questioner topics')
     if (!question) {
       return ctx.throw(404, '话题不存在')
     }
@@ -52,6 +52,7 @@ class QuestionController {
     ctx.verifyParams({
       title: { type: 'string', required: true },
       description: { type: 'string', required: false },
+      topics: { type: 'array', required: false },
     })
     const question = await new Question({
       ...ctx.request.body,
@@ -68,6 +69,7 @@ class QuestionController {
     ctx.verifyParams({
       title: { type: 'string', required: false },
       description: { type: 'string', required: false },
+      topics: { type: 'array', required: false },
     })
     const question = await Question.findByIdAndUpdate(
       ctx.request.body.id,

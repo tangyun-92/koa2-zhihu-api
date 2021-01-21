@@ -2,10 +2,11 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-20 22:26:17
+ * @Last Modified time: 2021-01-21 14:29:54
  */
 const Topic = require('../models/topics')
 const User = require('../models/users')
+const Question = require('../models/questions')
 const { secret } = require('../config')
 const { returnCtxBody } = require('../utils')
 
@@ -15,11 +16,11 @@ class TopicsController {
    * @param {*} ctx
    */
   async getTopicList(ctx) {
-    let { limit = 10, page = 1 } = ctx.request.body
+    let { limit = 10, page = 1, searchCon } = ctx.request.body
     page = Math.max(page * 1, 1) - 1
     limit = Math.max(limit * 1, 1)
     const topics = await Topic.find()
-      .find({ name: new RegExp(ctx.request.body.searchCon) })
+      .find({ name: new RegExp(searchCon) })
       .limit(limit)
       .skip(page * limit)
     const total = topics.length
@@ -91,6 +92,15 @@ class TopicsController {
   async topicsListFollowers(ctx) {
     const users = await User.find({ topic: ctx.request.body.id })
     ctx.body = returnCtxBody('查询成功', users)
+  }
+
+  /**
+   * 话题下包含的问题列表
+   * @param {*} ctx
+   */
+  async topicsIncludeQuestionList(ctx) {
+    const questions = await Question.find({ topics: ctx.request.body.id })
+    ctx.body = returnCtxBody('获取成功', questions)
   }
 }
 
