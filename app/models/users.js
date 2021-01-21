@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 16:30:03
+ * @Last Modified time: 2021-01-21 17:46:52
  * 用户
  */
 const mongoose = require('mongoose')
@@ -66,6 +66,24 @@ const userSchema = new Schema({
     ],
     select: false,
   }, // 话题列表
+  likingAnswers: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Answer',
+      },
+    ],
+    select: false,
+  }, // 赞过的答案
+  disLikingAnswers: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Answer',
+      },
+    ],
+    select: false,
+  }, // 踩过的答案
 })
 
 module.exports = model('User', userSchema)

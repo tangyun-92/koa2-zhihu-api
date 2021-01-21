@@ -2,12 +2,13 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 09:36:27
+ * @Last Modified time: 2021-01-21 18:36:07
  */
 const jsonwebtoken = require('jsonwebtoken')
 
 const User = require('../models/users')
 const Question = require('../models/questions')
+const Answer = require('../models/answers')
 const { secret } = require('../config')
 const { returnCtxBody } = require('../utils')
 
@@ -275,6 +276,113 @@ class UsersController {
     })
     const questions = await Question.find({ questioner: ctx.request.body.id })
     ctx.body = returnCtxBody('获取成功', questions)
+  }
+
+  /**
+   * 获取用户赞过的答案
+   * @param {*} ctx
+   */
+  async likeAnswerList(ctx) {
+    ctx.verifyParams({
+      id: { type: 'string', required: true },
+    })
+    const user = await User.findById(ctx.request.body.id)
+      .select('+likingAnswers')
+      .populate('likingAnswers')
+    if (!user) {
+      return ctx.throw(404, '用户不存在')
+    }
+    ctx.body = returnCtxBody('查询成功', user.likingAnswers)
+  }
+
+  /**
+   * 赞问题的答案
+   * @param {*} ctx
+   */
+  async likeAnswer(ctx, next) {
+    const answer_id = ctx.request.body.id
+    console.log(answer_id)
+    const me = await User.findById(ctx.state.user._id).select('+likingAnswers')
+    // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
+    if (!me.likingAnswers.map((id) => id.toString()).includes(answer_id)) {
+      me.likingAnswers.push(answer_id)
+      me.save()
+      await Answer.findByIdAndUpdate(answer_id, { $inc: { voteCount: 1 } }) // 表示点赞加1
+      ctx.body = returnCtxBody('成功')
+    } else {
+      ctx.throw(409, '您已经赞过了')
+    }
+    // await next()
+  }
+
+  /**
+   * 取消赞问题的答案
+   * @param {*} ctx
+   */
+  async unLikeAnswer(ctx) {
+    const answer_id = ctx.request.body.id
+    const me = await User.findById(ctx.state.user._id).select('+likingAnswers')
+    const index = me.likingAnswers.map((id) => id.toString()).indexOf(answer_id)
+    if (index > -1) {
+      me.likingAnswers.splice(index, 1)
+      me.save()
+      await Answer.findByIdAndUpdate(answer_id, { $inc: { voteCount: -1 } })
+    }
+    ctx.body = returnCtxBody('成功')
+  }
+
+  /**
+   * 获取用户踩过的答案
+   * @param {*} ctx
+   */
+  async dislikeAnswerList(ctx) {
+    ctx.verifyParams({
+      id: { type: 'string', required: true },
+    })
+    const user = await User.findById(ctx.request.body.id)
+      .select('+disLikingAnswers')
+      .populate('disLikingAnswers')
+    if (!user) {
+      return ctx.throw(404, '用户不存在')
+    }
+    ctx.body = returnCtxBody('查询成功', user.disLikingAnswers)
+  }
+
+  /**
+   * 踩问题的答案
+   * @param {*} ctx
+   */
+  async dislikeAnswer(ctx, next) {
+    const answer_id = ctx.request.body.id
+    const me = await User.findById(ctx.state.user._id).select(
+      '+disLikingAnswers'
+    )
+    // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
+    if (!me.disLikingAnswers.map((id) => id.toString()).includes(answer_id)) {
+      me.disLikingAnswers.push(answer_id)
+      me.save()
+      ctx.body = returnCtxBody('成功')
+    }
+    await next()
+  }
+
+  /**
+   * 取消踩问题的答案
+   * @param {*} ctx
+   */
+  async unDislikeAnswer(ctx) {
+    const answer_id = ctx.request.body.id
+    const me = await User.findById(ctx.state.user._id).select(
+      '+disLikingAnswers'
+    )
+    const index = me.disLikingAnswers
+      .map((id) => id.toString())
+      .indexOf(answer_id)
+    if (index > -1) {
+      me.disLikingAnswers.splice(index, 1)
+      me.save()
+    }
+    ctx.body = returnCtxBody('成功')
   }
 }
 
