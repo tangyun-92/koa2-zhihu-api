@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 18:36:07
+ * @Last Modified time: 2021-01-21 18:41:22
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -380,6 +380,60 @@ class UsersController {
       .indexOf(answer_id)
     if (index > -1) {
       me.disLikingAnswers.splice(index, 1)
+      me.save()
+    }
+    ctx.body = returnCtxBody('成功')
+  }
+
+  /**
+   * 获取用户收藏答案
+   * @param {*} ctx
+   */
+  async collectAnswerList(ctx) {
+    ctx.verifyParams({
+      id: { type: 'string', required: true },
+    })
+    const user = await User.findById(ctx.request.body.id)
+      .select('+collectingAnswers')
+      .populate('collectingAnswers')
+    if (!user) {
+      return ctx.throw(404, '用户不存在')
+    }
+    ctx.body = returnCtxBody('查询成功', user.collectingAnswers)
+  }
+
+  /**
+   * 收藏答案
+   * @param {*} ctx
+   */
+  async collectAnswer(ctx, next) {
+    const answer_id = ctx.request.body.id
+    const me = await User.findById(ctx.state.user._id).select(
+      '+collectingAnswers'
+    )
+    // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
+    if (!me.collectingAnswers.map((id) => id.toString()).includes(answer_id)) {
+      me.collectingAnswers.push(answer_id)
+      me.save()
+      ctx.body = returnCtxBody('成功')
+    }
+    await next()
+  }
+
+  /**
+   * 取消收藏答案
+   * @param {*} ctx
+   */
+  async unCollectAnswer(ctx) {
+    const answer_id = ctx.request.body.id
+    const me = await User.findById(ctx.state.user._id).select(
+      '+collectingAnswers'
+    )
+    const index = me.collectingAnswers
+      .map((id) => id.toString())
+      .indexOf(answer_id)
+    if (index > -1) {
+      me.collectingAnswers.splice(index, 1)
       me.save()
     }
     ctx.body = returnCtxBody('成功')

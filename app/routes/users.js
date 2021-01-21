@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:52
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 18:28:33
+ * @Last Modified time: 2021-01-21 18:43:42
  */
 const Router = require('koa-router')
 const jsonwebtoken = require('jsonwebtoken')
@@ -31,6 +31,9 @@ const {
   unDislikeAnswer,
   likeAnswerList,
   dislikeAnswerList,
+  collectAnswerList,
+  collectAnswer,
+  unCollectAnswer
 } = require('../controllers/users')
 const { checkOwner, checkUserExist } = require('../middlewares/users')
 const { secret } = require('../config')
@@ -61,5 +64,8 @@ router.post('/likeAnswer', auth, likeAnswer, dislikeAnswer)
 router.post('/unLikeAnswer', auth, unLikeAnswer)
 router.post('/dislikeAnswer', auth, dislikeAnswer, unLikeAnswer)
 router.post('/unDislikeAnswer', auth, unDislikeAnswer)
+router.post('/collectAnswerList', collectAnswerList)
+router.post('/collectAnswer', auth, collectAnswer)
+router.post('/unCollectAnswer', auth, unCollectAnswer)
 
 module.exports = router

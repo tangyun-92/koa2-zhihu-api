@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 17:46:52
+ * @Last Modified time: 2021-01-21 18:39:24
  * 用户
  */
 const mongoose = require('mongoose')
@@ -84,6 +84,15 @@ const userSchema = new Schema({
     ],
     select: false,
   }, // 踩过的答案
+  collectingAnswers: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Answer',
+      },
+    ],
+    select: false,
+  }, // 收藏的答案
 })
 
 module.exports = model('User', userSchema)
