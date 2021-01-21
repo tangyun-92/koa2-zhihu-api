@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-21 16:30:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 19:11:14
+ * @Last Modified time: 2021-01-21 22:12:29
  * 评论
  */
 const Comment = require('../models/comments')
@@ -25,14 +25,20 @@ class CommentController {
       searchCon,
       questionId,
       answerId,
+      rootCommentId
     } = ctx.request.body
     page = Math.max(page * 1, 1) - 1
     limit = Math.max(limit * 1, 1)
     const q = new RegExp(searchCon)
-    const comment = await Comment.find({ content: q, questionId, answerId })
+    const comment = await Comment.find({
+      content: q,
+      questionId,
+      answerId,
+      rootCommentId,
+    })
       .limit(limit)
       .skip(page * limit)
-      .populate('commentator')
+      .populate('commentator replayTo')
     const total = comment.length
     console.log(comment)
     ctx.body = returnCtxBody('获取成功', comment, total)
@@ -64,6 +70,8 @@ class CommentController {
       content: { type: 'string', required: true },
       questionId: { type: 'string', required: true },
       answerId: { type: 'string', required: true },
+      rootCommentId: { type: 'string', required: false },
+      replayTo: { type: 'string', required: false },
     })
     const comment = await new Comment({
       ...ctx.request.body,
@@ -82,6 +90,8 @@ class CommentController {
       content: { type: 'string', required: false },
       questionId: { type: 'string', required: true },
       answerId: { type: 'string', required: true },
+      rootCommentId: { type: 'string', required: false },
+      replayTo: { type: 'string', required: false },
     })
     const comment = await Comment.findByIdAndUpdate(
       ctx.request.body.id,

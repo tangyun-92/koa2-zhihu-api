@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-21 16:27:14
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 19:12:24
+ * @Last Modified time: 2021-01-21 22:08:26
  * 评论
  */
 const mongoose = require('mongoose')
@@ -20,6 +20,8 @@ const commentSchema = new Schema({
   }, // 评论人
   questionId: { type: String, required: true }, // 问题id
   answerId: { type: String, required: true }, // 答案id
+  rootCommentId: { type: String, }, // 根评论的id
+  replayTo: { type: Schema.Types.ObjectId, ref: 'User' }, // 回复给哪个用户
 })
 
 module.exports = model('Comment', commentSchema)
