@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 22:25:17
+ * @Last Modified time: 2021-01-22 15:29:19
  * 用户
  */
 const mongoose = require('mongoose')
@@ -14,8 +14,8 @@ const userSchema = new Schema(
     __v: { type: Number, select: false },
     name: { type: String, required: true },
     password: { type: String, required: true, select: false },
-    avatar_url: { type: String }, // 头像url
-    banner_url: { type: String }, // 个人中心banner url
+    avatarUrl: { type: String }, // 头像url
+    bannerUrl: { type: String }, // 个人中心banner url
     gender: {
       type: String,
       enum: ['male', 'female'],
@@ -94,6 +94,15 @@ const userSchema = new Schema(
       ],
       select: false,
     }, // 收藏的答案
+    question: {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'Question',
+        },
+      ],
+      select: false,
+    }, // 关注的问题列表
   },
   { timestamps: true }
 )

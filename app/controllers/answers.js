@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-21 16:30:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-22 11:10:14
+ * @Last Modified time: 2021-01-22 15:37:28
  * 答案
  */
 const Answer = require('../models/answers')
@@ -26,7 +26,7 @@ class AnswerController {
     limit = Math.max(limit * 1, 1)
     const q = new RegExp(searchCon)
     const answer = await Answer.find({
-      $or: [{ content: q }, { questionId }],
+      $and: [{ content: q }, { questionId: questionId }],
     })
       .limit(limit)
       .skip(page * limit)

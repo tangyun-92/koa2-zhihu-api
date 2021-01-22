@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:52
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 18:43:42
+ * @Last Modified time: 2021-01-22 15:59:58
  */
 const Router = require('koa-router')
 const jsonwebtoken = require('jsonwebtoken')
@@ -33,7 +33,10 @@ const {
   dislikeAnswerList,
   collectAnswerList,
   collectAnswer,
-  unCollectAnswer
+  unCollectAnswer,
+  focusQuestionList,
+  focusQuestion,
+  unFocusQuestion,
 } = require('../controllers/users')
 const { checkOwner, checkUserExist } = require('../middlewares/users')
 const { secret } = require('../config')
@@ -60,12 +63,15 @@ router.post('/followerTopicList', followerTopicList)
 router.post('/questionsList', questionsList)
 router.post('/likeAnswerList', likeAnswerList)
 router.post('/dislikeAnswerList', dislikeAnswerList)
-router.post('/likeAnswer', auth, likeAnswer, dislikeAnswer)
+router.post('/likeAnswer', auth, likeAnswer, unDislikeAnswer)
 router.post('/unLikeAnswer', auth, unLikeAnswer)
 router.post('/dislikeAnswer', auth, dislikeAnswer, unLikeAnswer)
 router.post('/unDislikeAnswer', auth, unDislikeAnswer)
 router.post('/collectAnswerList', collectAnswerList)
 router.post('/collectAnswer', auth, collectAnswer)
 router.post('/unCollectAnswer', auth, unCollectAnswer)
+router.post('/focusQuestionList', focusQuestionList)
+router.post('/focusQuestion', auth, focusQuestion)
+router.post('/unFocusQuestion', auth, unFocusQuestion)
 
 module.exports = router

@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-22 14:27:56
+ * @Last Modified time: 2021-01-22 16:12:21
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -35,9 +35,9 @@ class UsersController {
    */
   async getUserInfo(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      userId: { type: 'string', required: true },
     })
-    const id = ctx.request.body.id
+    const id = ctx.request.body.userId
     const user = await User.findById(id)
       .select('+employments +educations')
       .populate(
@@ -75,9 +75,9 @@ class UsersController {
   async updateUserInfo(ctx) {
     // 参数校验
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      userId: { type: 'string', required: true },
       name: { type: 'string', required: false },
-      avatar_url: { type: 'string', required: false },
+      avatarUrl: { type: 'string', required: false },
       banner_url: { type: 'string', required: false },
       gender: { type: 'string', required: false },
       headline: { type: 'string', required: false },
@@ -87,10 +87,10 @@ class UsersController {
       educations: { type: 'array', itemType: 'object', required: false },
     })
     const user = await User.findByIdAndUpdate(
-      ctx.request.body.id,
+      ctx.request.body.userId,
       ctx.request.body
     )
-    const dbUser = await User.findById(ctx.request.body.id).select(
+    const dbUser = await User.findById(ctx.request.body.userId).select(
       '+educations +locations +business +employments'
     )
     ctx.body = returnCtxBody('更新成功', dbUser)
@@ -101,7 +101,10 @@ class UsersController {
    * @param {*} ctx
    */
   async deleteUser(ctx) {
-    const user = await User.findByIdAndRemove(ctx.request.body.id)
+    ctx.verifyParams({
+      userId: { type: 'string', required: true },
+    })
+    const user = await User.findByIdAndRemove(ctx.request.body.userId)
     if (!user) {
       return ctx.throw(404, '用户不存在')
     }
@@ -137,9 +140,9 @@ class UsersController {
    */
   async interestList(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      userId: { type: 'string', required: true },
     })
-    const user = await User.findById(ctx.request.body.id)
+    const user = await User.findById(ctx.request.body.userId)
       .select('+following')
       .populate('following')
     if (!user) {
@@ -154,9 +157,9 @@ class UsersController {
    */
   async fanList(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      userId: { type: 'string', required: true },
     })
-    const users = await User.find({ following: ctx.request.body.id })
+    const users = await User.find({ following: ctx.request.body.userId })
     if (!users) {
       return ctx.throw(404, '用户不存在')
     }
@@ -168,12 +171,15 @@ class UsersController {
    * @param {*} ctx
    */
   async follow(ctx) {
+    ctx.verifyParams({
+      userId: { type: 'string', required: true },
+    })
     const me = await User.findById(ctx.state.user._id).select('+following')
     // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
     if (
-      !me.following.map((id) => id.toString()).includes(ctx.request.body.id)
+      !me.following.map((id) => id.toString()).includes(ctx.request.body.userId)
     ) {
-      me.following.push(ctx.request.body.id)
+      me.following.push(ctx.request.body.userId)
       me.save()
       ctx.body = returnCtxBody('关注成功')
     } else {
@@ -186,10 +192,13 @@ class UsersController {
    * @param {*} ctx
    */
   async unFollow(ctx) {
+    ctx.verifyParams({
+      userId: { type: 'string', required: true },
+    })
     const me = await User.findById(ctx.state.user._id).select('+following')
     const index = me.following
       .map((id) => id.toString())
-      .indexOf(ctx.request.body.id) // 获取要取消关注人在列表中的索引
+      .indexOf(ctx.request.body.userId) // 获取要取消关注人在列表中的索引
     if (index > -1) {
       me.following.splice(index, 1)
       me.save()
@@ -203,17 +212,17 @@ class UsersController {
    */
   async updatePassword(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      userId: { type: 'string', required: true },
       oldPassword: { type: 'string', required: true },
       newPassword: { type: 'string', required: true },
     })
-    const { id, oldPassword, newPassword } = ctx.request.body
-    const data = await User.findById(id).select('+password')
+    const { userId, oldPassword, newPassword } = ctx.request.body
+    const data = await User.findById(userId).select('+password')
     if (data.password !== oldPassword) {
       return ctx.throw(404, '旧密码不正确')
     }
     let password = newPassword
-    await User.findByIdAndUpdate(id, { password })
+    await User.findByIdAndUpdate(userId, { password })
     ctx.body = returnCtxBody('修改密码成功')
   }
 
@@ -222,10 +231,15 @@ class UsersController {
    * @param {*} ctx
    */
   async followerTopic(ctx) {
+    ctx.verifyParams({
+      topicId: { type: 'string', required: true },
+    })
     const me = await User.findById(ctx.state.user._id).select('+topic')
     // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
-    if (!me.topic.map((id) => id.toString()).includes(ctx.request.body.id)) {
-      me.topic.push(ctx.request.body.id)
+    if (
+      !me.topic.map((id) => id.toString()).includes(ctx.request.body.topicId)
+    ) {
+      me.topic.push(ctx.request.body.topicId)
       me.save()
       ctx.body = returnCtxBody('关注成功')
     } else {
@@ -238,10 +252,13 @@ class UsersController {
    * @param {*} ctx
    */
   async unFollowerTopic(ctx) {
+    ctx.verifyParams({
+      topicId: { type: 'string', required: true },
+    })
     const me = await User.findById(ctx.state.user._id).select('+topic')
     const index = me.topic
       .map((id) => id.toString())
-      .indexOf(ctx.request.body.id) // 获取要取消关注话题在列表中的索引
+      .indexOf(ctx.request.body.topicId) // 获取要取消关注话题在列表中的索引
     if (index > -1) {
       me.topic.splice(index, 1)
       me.save()
@@ -255,9 +272,9 @@ class UsersController {
    */
   async followerTopicList(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      userId: { type: 'string', required: true },
     })
-    const user = await User.findById(ctx.request.body.id)
+    const user = await User.findById(ctx.request.body.userId)
       .select('+topic')
       .populate('topic')
     if (!user) {
@@ -272,9 +289,11 @@ class UsersController {
    */
   async questionsList(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      userId: { type: 'string', required: true },
     })
-    const questions = await Question.find({ questioner: ctx.request.body.id })
+    const questions = await Question.find({
+      questioner: ctx.request.body.userId,
+    })
     ctx.body = returnCtxBody('获取成功', questions)
   }
 
@@ -284,9 +303,9 @@ class UsersController {
    */
   async likeAnswerList(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      userId: { type: 'string', required: true },
     })
-    const user = await User.findById(ctx.request.body.id)
+    const user = await User.findById(ctx.request.body.userId)
       .select('+likingAnswers')
       .populate('likingAnswers')
     if (!user) {
@@ -300,19 +319,18 @@ class UsersController {
    * @param {*} ctx
    */
   async likeAnswer(ctx, next) {
-    const answer_id = ctx.request.body.id
-    console.log(answer_id)
+    const answerId = ctx.request.body.answerId
     const me = await User.findById(ctx.state.user._id).select('+likingAnswers')
     // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
-    if (!me.likingAnswers.map((id) => id.toString()).includes(answer_id)) {
-      me.likingAnswers.push(answer_id)
+    if (!me.likingAnswers.map((id) => id.toString()).includes(answerId)) {
+      me.likingAnswers.push(answerId)
       me.save()
-      await Answer.findByIdAndUpdate(answer_id, { $inc: { voteCount: 1 } }) // 表示点赞加1
+      await Answer.findByIdAndUpdate(answerId, { $inc: { voteCount: 1 } }) // 表示点赞加1
       ctx.body = returnCtxBody('成功')
     } else {
       ctx.throw(409, '您已经赞过了')
     }
-    // await next()
+    await next()
   }
 
   /**
@@ -320,13 +338,13 @@ class UsersController {
    * @param {*} ctx
    */
   async unLikeAnswer(ctx) {
-    const answer_id = ctx.request.body.id
+    const answerId = ctx.request.body.answerId
     const me = await User.findById(ctx.state.user._id).select('+likingAnswers')
-    const index = me.likingAnswers.map((id) => id.toString()).indexOf(answer_id)
+    const index = me.likingAnswers.map((id) => id.toString()).indexOf(answerId)
     if (index > -1) {
       me.likingAnswers.splice(index, 1)
       me.save()
-      await Answer.findByIdAndUpdate(answer_id, { $inc: { voteCount: -1 } })
+      await Answer.findByIdAndUpdate(answerId, { $inc: { voteCount: -1 } })
     }
     ctx.body = returnCtxBody('成功')
   }
@@ -337,9 +355,9 @@ class UsersController {
    */
   async dislikeAnswerList(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      userId: { type: 'string', required: true },
     })
-    const user = await User.findById(ctx.request.body.id)
+    const user = await User.findById(ctx.request.body.userId)
       .select('+disLikingAnswers')
       .populate('disLikingAnswers')
     if (!user) {
@@ -353,16 +371,15 @@ class UsersController {
    * @param {*} ctx
    */
   async dislikeAnswer(ctx, next) {
-    const answer_id = ctx.request.body.id
+    const answerId = ctx.request.body.answerId
     const me = await User.findById(ctx.state.user._id).select(
       '+disLikingAnswers'
     )
-    // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
-    if (!me.disLikingAnswers.map((id) => id.toString()).includes(answer_id)) {
-      me.disLikingAnswers.push(answer_id)
+    if (!me.disLikingAnswers.map((id) => id.toString()).includes(answerId)) {
+      me.disLikingAnswers.push(answerId)
       me.save()
-      ctx.body = returnCtxBody('成功')
     }
+    ctx.body = returnCtxBody('成功')
     await next()
   }
 
@@ -371,13 +388,13 @@ class UsersController {
    * @param {*} ctx
    */
   async unDislikeAnswer(ctx) {
-    const answer_id = ctx.request.body.id
+    const answerId = ctx.request.body.answerId
     const me = await User.findById(ctx.state.user._id).select(
       '+disLikingAnswers'
     )
     const index = me.disLikingAnswers
       .map((id) => id.toString())
-      .indexOf(answer_id)
+      .indexOf(answerId)
     if (index > -1) {
       me.disLikingAnswers.splice(index, 1)
       me.save()
@@ -386,14 +403,14 @@ class UsersController {
   }
 
   /**
-   * 获取用户收藏答案
+   * 获取用户收藏的答案
    * @param {*} ctx
    */
   async collectAnswerList(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      userId: { type: 'string', required: true },
     })
-    const user = await User.findById(ctx.request.body.id)
+    const user = await User.findById(ctx.request.body.userId)
       .select('+collectingAnswers')
       .populate('collectingAnswers')
     if (!user) {
@@ -407,13 +424,13 @@ class UsersController {
    * @param {*} ctx
    */
   async collectAnswer(ctx, next) {
-    const answer_id = ctx.request.body.id
+    const answerId = ctx.request.body.answerId
     const me = await User.findById(ctx.state.user._id).select(
       '+collectingAnswers'
     )
     // map方法表示将mongoose中的数据类型先转为字符串再判断是否存在
-    if (!me.collectingAnswers.map((id) => id.toString()).includes(answer_id)) {
-      me.collectingAnswers.push(answer_id)
+    if (!me.collectingAnswers.map((id) => id.toString()).includes(answerId)) {
+      me.collectingAnswers.push(answerId)
       me.save()
       ctx.body = returnCtxBody('成功')
     }
@@ -425,13 +442,13 @@ class UsersController {
    * @param {*} ctx
    */
   async unCollectAnswer(ctx) {
-    const answer_id = ctx.request.body.id
+    const answerId = ctx.request.body.answerId
     const me = await User.findById(ctx.state.user._id).select(
       '+collectingAnswers'
     )
     const index = me.collectingAnswers
       .map((id) => id.toString())
-      .indexOf(answer_id)
+      .indexOf(answerId)
     if (index > -1) {
       me.collectingAnswers.splice(index, 1)
       me.save()
@@ -441,10 +458,60 @@ class UsersController {
 
   /**
    * 用户关注的问题列表
-   * @param {*} ctx 
+   * @param {*} ctx
    */
   async focusQuestionList(ctx) {
+    ctx.verifyParams({
+      userId: { type: 'string', required: true },
+    })
+    const user = await User.findById(ctx.request.body.userId)
+      .select('+question')
+      .populate('question')
+    if (!user) {
+      return ctx.throw(404, '用户不存在')
+    }
+    ctx.body = returnCtxBody('查询成功', user.question)
+  }
 
+  /**
+   * 关注问题
+   * @param {*} ctx
+   */
+  async focusQuestion(ctx) {
+    ctx.verifyParams({
+      questionId: { type: 'string', required: true },
+    })
+    const me = await User.findById(ctx.state.user._id).select('+question')
+    if (
+      !me.question
+        .map((id) => id.toString())
+        .includes(ctx.request.body.questionId)
+    ) {
+      me.question.push(ctx.request.body.questionId)
+      me.save()
+      ctx.body = returnCtxBody('关注成功')
+    } else {
+      ctx.throw(405, '您已经关注过了')
+    }
+  }
+
+  /**
+   * 取消关注问题
+   * @param {*} ctx
+   */
+  async unFocusQuestion(ctx) {
+    ctx.verifyParams({
+      questionId: { type: 'string', required: true },
+    })
+    const me = await User.findById(ctx.state.user._id).select('+question')
+    const index = me.question
+      .map((id) => id.toString())
+      .indexOf(ctx.request.body.questionId)
+    if (index > -1) {
+      me.question.splice(index, 1)
+      me.save()
+    }
+    ctx.body = returnCtxBody('取消关注成功')
   }
 }
 
