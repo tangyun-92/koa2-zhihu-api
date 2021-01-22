@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-21 16:30:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 16:53:44
+ * @Last Modified time: 2021-01-22 11:10:14
  * 答案
  */
 const Answer = require('../models/answers')
@@ -15,9 +15,9 @@ class AnswerController {
    * @param {*} ctx
    */
   async getAnswerList(ctx) {
-    ctx.verifyParams = {
+    ctx.verifyParams({
       questionId: { type: 'string', required: true },
-    }
+    })
     let { limit = 10, page = 1, searchCon, questionId } = ctx.request.body
     if (!questionId) {
       return ctx.throw(404, '该问题不存在')
@@ -39,10 +39,10 @@ class AnswerController {
    * @param {*} ctx
    */
   async getAnswerInfo(ctx) {
-    ctx.verifyParams = {
-      id: { type: 'string', required: true },
-    }
-    const answer = await Answer.findById(ctx.request.body.id)
+    ctx.verifyParams({
+      answerId: { type: 'string', required: true },
+    })
+    const answer = await Answer.findById(ctx.request.body.answerId)
       .select('+introduction')
       .populate('answerer')
     if (!answer) {
@@ -73,15 +73,14 @@ class AnswerController {
    */
   async updateAnswer(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      answerId: { type: 'string', required: true },
       content: { type: 'string', required: false },
-      questionId: { type: 'string', required: true },
     })
     const answer = await Answer.findByIdAndUpdate(
-      ctx.request.body.id,
+      ctx.request.body.answerId,
       ctx.request.body
     )
-    const newAnswer = await Answer.findById(ctx.request.body.id)
+    const newAnswer = await Answer.findById(ctx.request.body.answerId)
     if (!newAnswer) {
       return ctx.throw(404, '答案不存在')
     }
@@ -93,7 +92,10 @@ class AnswerController {
    * @param {*} ctx
    */
   async deleteAnswer(ctx) {
-    const answer = await Answer.findByIdAndRemove(ctx.request.body.id)
+    ctx.verifyParams({
+      answerId: { type: 'string', required: true },
+    })
+    const answer = await Answer.findByIdAndRemove(ctx.request.body.answerId)
     if (!answer) {
       return ctx.throw(404, '答案不存在')
     }

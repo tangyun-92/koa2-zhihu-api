@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 14:29:54
+ * @Last Modified time: 2021-01-22 11:34:52
  */
 const Topic = require('../models/topics')
 const User = require('../models/users')
@@ -32,10 +32,10 @@ class TopicsController {
    * @param {*} ctx
    */
   async getTopicInfo(ctx) {
-    ctx.verifyParams = {
-      id: { type: 'string', required: true },
-    }
-    const topic = await Topic.findById(ctx.request.body.id).select(
+    ctx.verifyParams({
+      topicId: { type: 'string', required: true },
+    })
+    const topic = await Topic.findById(ctx.request.body.topicId).select(
       '+introduction'
     )
     if (!topic) {
@@ -51,7 +51,7 @@ class TopicsController {
   async createTopic(ctx) {
     ctx.verifyParams({
       name: { type: 'string', required: true },
-      avatar_url: { type: 'string', required: false },
+      avatarUrl: { type: 'string', required: false },
       introduction: { type: 'string', required: false },
     })
     const { name } = ctx.request.body
@@ -69,16 +69,16 @@ class TopicsController {
    */
   async updateTopic(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      answerId: { type: 'string', required: true },
       name: { type: 'string', required: false },
-      avatar_url: { type: 'string', required: false },
+      avatarUrl: { type: 'string', required: false },
       introduction: { type: 'string', required: false },
     })
     const topic = await Topic.findByIdAndUpdate(
-      ctx.request.body.id,
+      ctx.request.body.answerId,
       ctx.request.body
     )
-    const newTopic = await Topic.findById(ctx.request.body.id)
+    const newTopic = await Topic.findById(ctx.request.body.answerId)
     if (!newTopic) {
       return ctx.throw(404, '话题不存在')
     }
@@ -90,7 +90,10 @@ class TopicsController {
    * @param {*} ctx
    */
   async topicsListFollowers(ctx) {
-    const users = await User.find({ topic: ctx.request.body.id })
+    ctx.verifyParams({
+      topicId: { type: 'string', required: true },
+    })
+    const users = await User.find({ topic: ctx.request.body.topicId })
     ctx.body = returnCtxBody('查询成功', users)
   }
 
@@ -99,7 +102,10 @@ class TopicsController {
    * @param {*} ctx
    */
   async topicsIncludeQuestionList(ctx) {
-    const questions = await Question.find({ topics: ctx.request.body.id })
+    ctx.verifyParams({
+      topicId: { type: 'string', required: true },
+    })
+    const questions = await Question.find({ topics: ctx.request.body.topicId })
     ctx.body = returnCtxBody('获取成功', questions)
   }
 }

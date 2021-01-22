@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-21 16:30:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 22:12:29
+ * @Last Modified time: 2021-01-22 13:41:33
  * 评论
  */
 const Comment = require('../models/comments')
@@ -15,17 +15,17 @@ class CommentController {
    * @param {*} ctx
    */
   async getCommentList(ctx) {
-    ctx.verifyParams = {
+    ctx.verifyParams({
       questionId: { type: 'string', required: true },
-      answerId: { type: 'string', answerId: true },
-    }
+      answerId: { type: 'string', required: true },
+    })
     let {
       limit = 10,
       page = 1,
       searchCon,
       questionId,
       answerId,
-      rootCommentId
+      rootCommentId,
     } = ctx.request.body
     page = Math.max(page * 1, 1) - 1
     limit = Math.max(limit * 1, 1)
@@ -49,10 +49,10 @@ class CommentController {
    * @param {*} ctx
    */
   async getCommentInfo(ctx) {
-    ctx.verifyParams = {
-      id: { type: 'string', required: true },
-    }
-    const comment = await Comment.findById(ctx.request.body.id)
+    ctx.verifyParams({
+      commentId: { type: 'string', required: true },
+    })
+    const comment = await Comment.findById(ctx.request.body.commentId)
       .select('+commentator')
       .populate('commentator')
     if (!comment) {
@@ -86,7 +86,7 @@ class CommentController {
    */
   async updateComment(ctx) {
     ctx.verifyParams({
-      id: { type: 'string', required: true },
+      commentId: { type: 'string', required: true },
       content: { type: 'string', required: false },
       questionId: { type: 'string', required: true },
       answerId: { type: 'string', required: true },
@@ -94,10 +94,10 @@ class CommentController {
       replayTo: { type: 'string', required: false },
     })
     const comment = await Comment.findByIdAndUpdate(
-      ctx.request.body.id,
+      ctx.request.body.commentId,
       ctx.request.body
     )
-    const newComment = await Comment.findById(ctx.request.body.id)
+    const newComment = await Comment.findById(ctx.request.body.commentId)
     if (!newComment) {
       return ctx.throw(404, '评论不存在')
     }
@@ -109,7 +109,10 @@ class CommentController {
    * @param {*} ctx
    */
   async deleteComment(ctx) {
-    const comment = await Comment.findByIdAndRemove(ctx.request.body.id)
+    ctx.verifyParams({
+      commentId: { type: 'string', required: true },
+    })
+    const comment = await Comment.findByIdAndRemove(ctx.request.body.commentId)
     if (!comment) {
       return ctx.throw(404, '评论不存在')
     }

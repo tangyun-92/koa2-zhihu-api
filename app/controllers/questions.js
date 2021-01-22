@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-20 17:02:21
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 16:30:17
+ * @Last Modified time: 2021-01-22 10:53:11
  * 问题
  */
 const Question = require('../models/questions')
@@ -33,14 +33,14 @@ class QuestionController {
    * @param {*} ctx
    */
   async getQuestionInfo(ctx) {
-    ctx.verifyParams = {
-      id: { type: 'string', required: true },
-    }
-    const question = await Question.findById(ctx.request.body.id)
+    ctx.verifyParams({
+      questionId: { type: 'string', required: true },
+    })
+    const question = await Question.findById(ctx.request.body.questionId)
       .select('+introduction')
       .populate('questioner topics')
     if (!question) {
-      return ctx.throw(404, '话题不存在')
+      return ctx.throw(404, '问题不存在')
     }
     ctx.body = returnCtxBody('获取成功', question)
   }
@@ -88,7 +88,10 @@ class QuestionController {
    * @param {*} ctx
    */
   async deleteQuestion(ctx) {
-    const question = await Question.findByIdAndRemove(ctx.request.body.id)
+    ctx.verifyParams({
+      questionId: { type: 'string', required: true },
+    })
+    const question = await Question.findByIdAndRemove(ctx.request.body.questionId)
     if (!question) {
       return ctx.throw(404, '问题不存在')
     }

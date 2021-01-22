@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-21 18:41:22
+ * @Last Modified time: 2021-01-22 14:27:56
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -437,6 +437,14 @@ class UsersController {
       me.save()
     }
     ctx.body = returnCtxBody('成功')
+  }
+
+  /**
+   * 用户关注的问题列表
+   * @param {*} ctx 
+   */
+  async focusQuestionList(ctx) {
+
   }
 }
 
