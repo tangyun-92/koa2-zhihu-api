@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:23
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-28 16:19:09
+ * @Last Modified time: 2021-01-28 17:15:00
  * 用户
  */
 const mongoose = require('mongoose')
@@ -107,6 +107,10 @@ const userSchema = new Schema(
       type: [{ type: Schema.Types.ObjectId, ref: 'Column' }],
       select: false,
     }, // 用户的专栏列表
+    article: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'Article' }],
+      select: false
+    }, // 用户的文章列表
   },
   { timestamps: true }
 )

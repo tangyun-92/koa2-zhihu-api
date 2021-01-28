@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:52
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-28 16:31:31
+ * @Last Modified time: 2021-01-28 17:16:27
  */
 const Router = require('koa-router')
 const jsonwebtoken = require('jsonwebtoken')
@@ -37,7 +37,8 @@ const {
   focusQuestionList,
   focusQuestion,
   unFocusQuestion,
-  columnsList
+  columnsList,
+  articlesList
 } = require('../controllers/users')
 const { checkOwner, checkUserExist } = require('../middlewares/users')
 const { secret } = require('../config')
@@ -75,5 +76,6 @@ router.post('/focusQuestionList', focusQuestionList)
 router.post('/focusQuestion', auth, focusQuestion)
 router.post('/unFocusQuestion', auth, unFocusQuestion)
 router.post('/columnsList', columnsList)
+router.post('/articlesList', articlesList)
 
 module.exports = router

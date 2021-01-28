@@ -1,12 +1,12 @@
 /*
- * @Author: 唐云 
- * @Date: 2021-01-28 16:13:28 
+ * @Author: 唐云
+ * @Date: 2021-01-28 16:13:28
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-28 16:26:10
+ * @Last Modified time: 2021-01-28 17:09:04
  * 专栏
  */
 const Column = require('../models/columns')
-const User = require('../models/users')
+const Article = require('../models/articles')
 const { returnCtxBody } = require('../utils')
 
 class ColumnController {
@@ -26,6 +26,23 @@ class ColumnController {
       .skip(page * limit)
     const total = column.length
     ctx.body = returnCtxBody('获取成功', column, total)
+  }
+
+  /**
+   * 获取专栏详情
+   * @param {*} ctx
+   */
+  async getColumnInfo(ctx) {
+    ctx.verifyParams({
+      columnId: { type: 'string', required: true },
+    })
+    const column = await Column.findById(ctx.request.body.columnId).populate(
+      'columnUser'
+    )
+    if (!column) {
+      return ctx.throw(404, '专栏不存在')
+    }
+    ctx.body = returnCtxBody('获取成功', column)
   }
 
   /**
@@ -79,6 +96,18 @@ class ColumnController {
       return ctx.throw(404, '专栏不存在')
     }
     ctx.body = returnCtxBody('删除成功')
+  }
+
+  /**
+   * 专栏下文章列表
+   * @param {*} ctx
+   */
+  async columnArticleList(ctx) {
+    ctx.verifyParams({
+      columnId: { type: 'string', required: true },
+    })
+    const articles = await Article.find({ column: ctx.request.body.columnId })
+    ctx.body = returnCtxBody('获取成功', articles)
   }
 }
 

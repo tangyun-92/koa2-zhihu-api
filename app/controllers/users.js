@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-28 16:31:58
+ * @Last Modified time: 2021-01-28 17:19:31
  */
 const jsonwebtoken = require('jsonwebtoken')
 
@@ -10,6 +10,7 @@ const User = require('../models/users')
 const Question = require('../models/questions')
 const Answer = require('../models/answers')
 const Column = require('../models/columns')
+const Article = require('../models/articles')
 const { secret } = require('../config')
 const { returnCtxBody } = require('../utils')
 
@@ -527,6 +528,20 @@ class UsersController {
       columnUser: ctx.request.body.userId,
     })
     ctx.body = returnCtxBody('获取成功', columns)
+  }
+
+  /**
+   * 获取用户的文章列表
+   * @param {*} ctx
+   */
+  async articlesList(ctx) {
+    ctx.verifyParams({
+      userId: { type: 'string', required: true },
+    })
+    const articles = await Article.find({
+      articleUser: ctx.request.body.userId,
+    })
+    ctx.body = returnCtxBody('获取成功', articles)
   }
 }
 
