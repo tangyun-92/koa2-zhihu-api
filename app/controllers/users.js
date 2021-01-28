@@ -2,13 +2,14 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-22 16:12:21
+ * @Last Modified time: 2021-01-28 16:31:58
  */
 const jsonwebtoken = require('jsonwebtoken')
 
 const User = require('../models/users')
 const Question = require('../models/questions')
 const Answer = require('../models/answers')
+const Column = require('../models/columns')
 const { secret } = require('../config')
 const { returnCtxBody } = require('../utils')
 
@@ -512,6 +513,20 @@ class UsersController {
       me.save()
     }
     ctx.body = returnCtxBody('取消关注成功')
+  }
+
+  /**
+   * 获取用户的专栏列表
+   * @param {*} ctx
+   */
+  async columnsList(ctx) {
+    ctx.verifyParams({
+      userId: { type: 'string', required: true },
+    })
+    const columns = await Column.find({
+      columnUser: ctx.request.body.userId,
+    })
+    ctx.body = returnCtxBody('获取成功', columns)
   }
 }
 

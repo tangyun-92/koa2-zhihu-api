@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:27:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-22 10:41:20
+ * @Last Modified time: 2021-01-27 22:51:48
  */
 const Koa = require('koa')
 const koaBody = require('koa-body')
@@ -11,6 +11,7 @@ const parameter = require('koa-parameter')
 const mongoose = require('mongoose')
 const path = require('path')
 const koaStatic = require('koa-static')
+const cors = require('koa2-cors')
 
 const app = new Koa()
 const routing = require('./routes')
@@ -37,13 +38,11 @@ function formatError(err) {
   }
 }
 app.use(
-  error(
-    {
-      postFormat: (e, { stack, ...rest }) =>
-        process.env.NODE_ENV === 'production' ? rest : { stack, ...rest },
-      format: formatError
-    },
-  )
+  error({
+    postFormat: (e, { stack, ...rest }) =>
+      process.env.NODE_ENV === 'production' ? rest : { stack, ...rest },
+    format: formatError,
+  })
 )
 
 // 使用koa-body实现文件上传
@@ -56,8 +55,33 @@ app.use(
     },
   })
 )
+
+// 解决跨域
+app.use(
+  cors()
+)
+
 // 校验参数
 app.use(parameter(app))
 routing(app)
+
+
+// app.use(async (ctx, next) => {
+//   ctx.set('Access-Control-Allow-Origin', '*')
+//   await next()
+// })
+// app.use(async (ctx, next) => {
+//   ctx.set('Access-Control-Allow-Origin', '*')
+//   ctx.set(
+//     'Access-Control-Allow-Headers',
+//     'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild'
+//   )
+//   ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS')
+//   if (ctx.method == 'OPTIONS') {
+//     ctx.body = 200
+//   } else {
+//     await next()
+//   }
+// })
 
 app.listen(3000, () => console.log('程序启动在3000端口'))
