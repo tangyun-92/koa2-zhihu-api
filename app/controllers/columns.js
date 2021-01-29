@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-28 16:13:28
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-28 17:09:04
+ * @Last Modified time: 2021-01-28 22:32:09
  * 专栏
  */
 const Column = require('../models/columns')
@@ -70,7 +70,7 @@ class ColumnController {
     ctx.verifyParams({
       title: { type: 'string', required: false },
       description: { type: 'string', required: false },
-      avatar: { type: 'array', required: false },
+      avatar: { type: 'string', required: false },
     })
     const column = await Column.findByIdAndUpdate(
       ctx.request.body.columnId,

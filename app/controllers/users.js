@@ -2,9 +2,10 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-28 17:19:31
+ * @Last Modified time: 2021-01-29 13:11:53
  */
 const jsonwebtoken = require('jsonwebtoken')
+const jwt = require('koa-jwt')
 
 const User = require('../models/users')
 const Question = require('../models/questions')
@@ -134,6 +135,18 @@ class UsersController {
       message: '登录成功',
       token,
     }
+  }
+
+  /**
+   * 根据token获取用户基本信息
+   * @param {*} ctx
+   */
+  async getUserInfoByToken(ctx) {
+    const user = await User.findById(ctx.state.user._id)
+    if (!user) {
+      return ctx.throw(404, '用户不存在')
+    }
+    ctx.body = returnCtxBody('查询成功', user)
   }
 
   /**

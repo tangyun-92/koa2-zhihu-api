@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:52
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-28 17:16:27
+ * @Last Modified time: 2021-01-29 13:10:17
  */
 const Router = require('koa-router')
 const jsonwebtoken = require('jsonwebtoken')
@@ -12,6 +12,7 @@ const router = new Router({ prefix: '/users' })
 const {
   getUserList,
   getUserInfo,
+  getUserInfoByToken,
   createUser,
   updateUserInfo,
   deleteUser,
@@ -51,6 +52,7 @@ const auth = jwt({ secret })
 router.post('/getUserList', getUserList)
 router.post('/createUser', createUser)
 router.post('/getUserInfo', getUserInfo)
+router.post('/getUserInfoByToken', auth, getUserInfoByToken)
 router.post('/updateUserInfo', auth, checkOwner, updateUserInfo)
 router.post('/deleteUser', auth, checkOwner, deleteUser)
 router.post('/login', login)
