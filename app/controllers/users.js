@@ -2,7 +2,7 @@
  * @Author: 唐云
  * @Date: 2021-01-16 23:26:03
  * @Last Modified by: 唐云
- * @Last Modified time: 2021-01-29 13:11:53
+ * @Last Modified time: 2021-01-29 13:16:02
  */
 const jsonwebtoken = require('jsonwebtoken')
 const jwt = require('koa-jwt')
@@ -134,6 +134,7 @@ class UsersController {
       status: 200,
       message: '登录成功',
       token,
+      data: user
     }
   }
 
